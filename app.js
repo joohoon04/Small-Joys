@@ -6,7 +6,8 @@ const app = express();
 const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");  
-const MongoStore = require("connect-mongo"); 
+const connectMongo = require("connect-mongo"); 
+const MongoStore = connectMongo.default || connectMongo;
 
 // 1. 미들웨어 설정
 app.use(express.json());
@@ -46,7 +47,10 @@ app.use(session({
     secret: "mySecretKey123!",
     resave: false,
     saveUninitialized: true,
-    store: new MongoStore({ mongoUrl: mongoUrl, collectionName: 'sessions' })
+    store: new MongoStore({ 
+        mongoUrl: mongoUrl, 
+        collectionName: 'sessions' 
+    })
 }));
 
 // 5. 라우터 연결
