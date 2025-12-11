@@ -1,0 +1,31 @@
+{
+  "name": "rlakf",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joohoon04/Small-Joys.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joohoon04/Small-Joys/issues"
+  },
+  "homepage": "https://github.com/joohoon04/Small-Joys#readme",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-mongo": "^6.0.0",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "mongoose": "^9.0.1",
+    "multer": "^2.0.2",
+    "path": "^0.12.7"
+  }
+}
