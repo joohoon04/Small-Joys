@@ -58,10 +58,6 @@ const index = require("./routes/index");
 app.use("/", index); 
 
 // 6. 서버 실행
-app.listen(3000, function () {
-    console.log("3000번 포트 실행 중입니다.");
-});
-// 6. 서버 실행
 // Render에서는 환경 변수 PORT를 사용하고, 로컬에서는 3000번을 사용합니다.
 const PORT = process.env.PORT || 3000; 
 app.listen(PORT, function () {
