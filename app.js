@@ -6,7 +6,7 @@ const app = express();
 const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");  
-const MongoStore = require("connect-mongo").default; 
+const MongoStore = require("connect-mongo"); 
 
 // 1. 미들웨어 설정
 app.use(express.json());
