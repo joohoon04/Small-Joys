@@ -5,8 +5,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const mongoose = require("mongoose");
-const session = require("express-session");  
-// 💡 수정 1: connect-mongo의 호환성을 위해 가져오는 방식을 변경합니다.
+const session = require("express-session");
 const connectMongo = require("connect-mongo"); 
 const MongoStore = connectMongo.default || connectMongo;
 
@@ -33,10 +32,7 @@ app.set("view engine", "ejs");
 
 // 3. MongoDB 연결
 const mongoUrl = process.env.MONGO_URL;
-// 💡 수정 2: Mongoose/MongoDB 최신 버전은 옵션을 지원하지 않으므로 모두 제거합니다.
-mongoose.connect(mongoUrl, {
-    // useNewUrlParser, useUnifiedTopology, sslvalidate 등 모든 옵션은 제거됩니다.
-}) 
+mongoose.connect(mongoUrl)
 .then(() => console.log("MongoDB 연결 성공"))
 .catch(err => console.error("MongoDB 연결 실패:", err));
 
