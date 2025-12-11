@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/joohoon04/Small-Joys#readme",
   "description": "",
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "connect-mongo": "^6.0.0",
