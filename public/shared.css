@@ -1,0 +1,153 @@
+html { height: 100%; }
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    background-color: #FFF8E1; 
+    color: #36454F;
+}
+
+/* 메인 컨테이너 */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+/* 페이지 헤더 */
+.community-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 10px 15px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.community-header h2 {
+    margin: 0;
+    color: #5a9dc5;
+    font-size: 1.8em;
+}
+
+/* 검색창 컨테이너 */
+.search-container form {
+    display: flex;
+    align-items: center;
+}
+.search-container input[type="text"] {
+    padding: 10px 14px;
+    font-size: 1em;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-right: 8px;
+}
+.search-container input[type="text"]:focus {
+    border-color: #87CEEB;
+    outline: none;
+}
+.search-container button {
+    padding: 10px 18px;
+    font-size: 1em;
+    font-weight: 600;
+    color: #fff;
+    background-color: #87CEEB;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.search-container button:hover {
+    background-color: #5a9dc5;
+}
+
+/* 게시물 목록 (카드 그리드) */
+.post-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* 개별 게시물 카드 */
+.post-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px 25px;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+.post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.post-card-title {
+    font-size: 1.35em;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 10px 0;
+}
+.post-card-snippet {
+    font-size: 1em;
+    color: #555;
+    line-height: 1.6;
+    margin: 0 0 15px 0;
+    flex-grow: 1;
+    min-height: 60px;
+}
+.post-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85em;
+    color: #888;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+    margin-top: auto;
+}
+.no-posts-found {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    color: #888;
+    background-color: #fff;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    font-size: 1.1em;
+}
+
+/* 카드 이미지 */
+.post-card-image {
+    width: 100%;
+    max-height: 200px; 
+    overflow: hidden;
+    margin: -20px -25px 15px -25px; 
+}
+
+.post-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+
+.post-card {
+    border-radius: 10px;
+}
+
+.post-card-image {
+    border-radius: 10px 10px 0 0;
+}
+a.post-card-link {
+    text-decoration: none;
+    color: inherit;
+}

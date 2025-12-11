@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 다이어리 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css">
+    <link rel="stylesheet" href="/home.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home" style="font-weight: bold; color: #5a9dc5;">나의 다이어리</a>|
+            <a href="happy-find">행복찾기</a>|
+            <a href="/mypage">마이페이지</a>|
+            <a href="/logout">로그아웃</a>
+        </nav>
+    </header>
+
+    <main class="diary-container">
+        <div class="diary-header">
+            <h2>나의 행복 일기 📝</h2>
+            <a href="/post/new" class="new-post-btn">새 일기 쓰기 +</a>
+        </div>
+
+        <div class="diary-list">
+            
+            <% if (posts.length > 0) { %>
+                <% posts.forEach(post => { %>
+                    <a href="/post/detail/<%= post._id %>" class="diary-item">
+                        <div class="item-info">
+                            <h3><%= post.title %></h3>
+                            <p><%= post.createdAt.toLocaleDateString('ko-KR') %></p>
+                        </div>
+                        <div class="item-status">
+                            <% if (post.isPublic) { %>
+                                <span class="status-public">🌏 공개</span>
+                            <% } else { %>
+                                <span class="status-private">🔒 비공개</span>
+                            <% } %>
+                        </div>
+                    </a>
+                <% }) %>
+            <% } else { %>
+                <div class="no-posts">
+                    <p>아직 작성한 일기가 없네요.</p>
+                    <p>오늘의 소소한 행복을 기록해 보는 건 어떨까요?</p>
+                </div>
+            <% } %>
+            
+        </div>
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+
+</body>
+</html>

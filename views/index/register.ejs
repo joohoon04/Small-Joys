@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css"> 
+</head>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/login">로그인</a>
+        </nav>
+    </header>
+
+    <main class="login-container">
+        <div class="login-box">
+            <h2>회원가입 (Sign Up)</h2>
+            <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                <div class="error-message">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+            <form action="/register" method="POST" class="login-form">
+                
+                <label for="id">아이디 (ID)</label>
+                <input type="text" id="id" name="id" placeholder="사용할 아이디" required minlength="4"><br>
+                
+                <label for="name">이름 (Name)</label>
+                <input type="text" id="name" name="name" placeholder="이름을 입력하세요" required><br>
+
+                <label for="email">이메일 (Email)</label>
+                <input type="email" id="email" name="email" placeholder="example@email.com (선택)"><br>
+
+                <label for="phone">전화번호 (Phone)</label>
+                <input type="tel" id="phone" name="phone" placeholder="010-0000-0000 (선택)"><br>
+
+                <label for="password">비밀번호 (Password)</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호 (4자 이상)" required minlength="4"><br>
+
+                <label for="confirm-password">비밀번호 확인</label>
+                <input type="password" id="confirm-password" name="confirm_password" placeholder="비밀번호를 다시 입력하세요" required minlength="4"><br>
+                
+                <div class="actions" style="justify-content: center;">
+                    <button type="submit" class="signup-button">가입 완료</button>
+                </div>                
+                <div style="margin-top: 25px; font-size: 0.9em;">
+                    이미 계정이 있으신가요? <a href="/login" style="color: #FFD700; font-weight: bold; text-decoration: none;">로그인 화면으로 돌아가기</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+ copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+</body>
+</html>

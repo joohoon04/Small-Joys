@@ -1,0 +1,147 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif; 
+    background-color: #FFF8E1; 
+    color: #36454F; 
+}
+
+.error-message {
+    background-color: #ffebe9; 
+    color: #d8000c; 
+    border: 1px solid #ffb3b3;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px; 
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 헤더 */
+.header {
+    background-color: #87CEEB; 
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #5a9dc5; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.header .logo {
+    font-weight: 800; 
+    font-size: 1.5em;
+    color: #FFFFFF; 
+    letter-spacing: 1px;
+}
+.header .nav a {
+    text-decoration: none;
+    color: #36454F; 
+    margin: 0 10px;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+.header .nav a:hover {
+    color: #5a9dc5;
+}
+
+/* 메인 */
+.login-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.login-box {
+    background-color: #FFFFFF; 
+    padding: 40px 50px;
+    border-radius: 12px; 
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.login-box h2 {
+    color: #FFD700; 
+    font-weight: 900;
+    margin-bottom: 25px;
+}
+
+.login-form label {
+    display: block;
+    text-align: left;
+    margin-top: 20px;
+    font-weight: 600;
+    color: #36454F;
+}
+.login-form input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9; 
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.login-form input:focus {
+    border-color: #87CEEB; 
+    box-shadow: 0 0 5px rgba(135, 206, 235, 0.5);
+    outline: none;
+}
+
+/* 버튼 섹션 */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 35px;
+}
+
+/* 회원가입 버튼 */
+.signup-button {
+    background-color: #FFFFFF; 
+    color: #36454F; 
+    padding: 10px 25px;
+    text-decoration: none;
+    border-radius: 20px;
+    border: 2px solid #36454F;
+    font-weight: 700;
+    transition: background-color 0.3s, color 0.3s;
+}
+.signup-button:hover {
+    background-color: #36454F;
+    color: #FFFFFF;
+}
+
+/* 로그인 화살표 버튼 */
+.submit-arrow {
+    background-color: #FFD700; 
+    border: none;
+    color: #FFFFFF; 
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    line-height: 1; 
+}
+.submit-arrow:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(255, 215, 0, 0.6);
+}
+
+/* footer */
+.footer {
+    background-color: #87CEEB; 
+    padding: 15px;
+    text-align: center;
+    color: #36454F;
+    font-size: 0.9em;
+    font-weight: 500;
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글상세페이지 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css">
+    <link rel="stylesheet" href="/main.css"> 
+    <style>
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home">나의 다이어리</a>|
+            <a href="happy-find">행복찾기</a>|
+            <a href="/mypage">마이페이지</a>|
+            <a href="/logout">로그아웃</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main>
+            <article class="post-container">
+                <div class="post-header">
+                    <div>
+                        <h1 class="title"><%= post.title %></h1>
+                        <div class="post-meta">
+                            <span>작성자: <%= post.authorId %></span> |
+                            <span>작성일: <%= post.createdAt.toLocaleDateString('ko-KR') %></span>
+                        </div>
+                    </div>
+                    
+                    <% if (user && user.id === post.authorId) { %>
+                        <div class="post-actions">
+                            <a href="/post/edit/<%= post._id %>">수정</a> 
+                            
+                            <form action="/post/delete/<%= post._id %>" method="POST" style="display: inline;" onsubmit="return confirm('정말로 이 일기를 삭제하시겠습니까? 관련 댓글도 모두 삭제됩니다.');">
+                                <button type="submit" class="delete-btn">삭제</button>
+                            </form>
+                        </div>
+                    <% } %>
+                
+                <div class="post-content">
+                    <% if (post.imageUrl) { %>
+                        <div class="post-image-container">
+                            <img src="<%= post.imageUrl %>" alt="<%= post.title %> 이미지">
+                        </div>
+                    <% } %>
+                    <pre><%= post.content %></pre>
+                </div>
+            </article>
+
+            <section class="comment-section">
+                <h3>댓글</h3>
+
+                <% if (user) { %>
+                    <form class="comment-form" action="/post/<%= post._id %>/comment" method="POST">
+                        <div style="margin-bottom: 5px; font-weight: bold; color: #555;">
+                            <%= user.id %> 님으로 댓글 작성:
+                        </div>
+                        <input type="text" name="commentText" placeholder="댓글을 작성해 주세요." required>
+                        <button type="submit">등록</button>
+                    </form>
+                <% } else { %>
+                    <div class="comment-form-login-prompt" style="text-align: center; padding: 20px; border: 1px dashed #ccc; border-radius: 5px; background-color: #f9f9f9;">
+                        <p style="margin: 0; color: #777;">댓글을 작성하려면 <a href="/login" style="color: #007bff; font-weight: bold;">로그인</a>이 필요합니다.</p>
+                    </div>
+                <% } %>
+
+                <div class="comment-list">
+                    <% comments.forEach(comment => { %>
+                        <div class="comment-item">
+                            <div class="comment-info">
+                                <div class="comment-author"><%= comment.author %></div>
+                                <div class="comment-text"><%= comment.text %></div>
+                            </div>
+                            <% if (user && user.id === comment.author) { %>
+                                <form class="delete-comment-form" action="/comment/delete/<%= comment._id %>" method="POST">
+                                    <button type="submit">삭제</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    <% }) %> 
+                    <% if (comments.length === 0) { %>
+                        <p style="text-align: center; color: #888;">아직 댓글이 없습니다. 첫 댓글을 작성해 보세요!</p>
+                    <% } %>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+
+</body>
+</html>

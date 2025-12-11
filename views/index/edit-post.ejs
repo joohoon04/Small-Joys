@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일기 수정 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css">
+    <link rel="stylesheet" href="/mypage.css">  
+    <link rel="stylesheet" href="/edit-post.css">
+</head>
+<body>
+
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home">나의 다이어리</a>|
+            <a href="/mypage">마이페이지</a>|
+            <a href="/logout">로그아웃</a>
+        </nav>
+    </header>
+
+    <main class="mypage-container">
+        <div class="mypage-box">
+            <h2>일기 수정하기</h2>
+            <form action="/post/edit/<%= post._id %>" method="POST" class="mypage-form" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" name="title" value="<%= post.title %>" required>
+                </div>
+
+                <% if (post.imageUrl) { %>
+                    <div class="form-group">
+                        <label>현재 이미지</label>
+                        <div class="current-image-preview">
+                            <img src="<%= post.imageUrl %>" alt="현재 이미지">
+                        </div>
+                    </div>
+                <% } %>
+
+                <div class="form-group">
+                    <label for="postImage">새 이미지로 변경 (선택)</label>
+                    <input type="file" id="postImage" name="postImage" accept="image/*" style="padding:0; border:none; background:none;">
+                </div>
+
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    <textarea id="content" name="content" class="post-content" required><%= post.content %></textarea>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="isPublic" name="isPublic" value="true" 
+                           <% if (post.isPublic) { %>checked<% } %> >
+                    <label for="isPublic">이 일기를 '공유페이지'에 공개합니다.</label>
+                </div>
+                
+                <div class="button-group">
+                    <a href="/post/detail/<%= post._id %>" class="withdraw-button" style="border-color:#aaa; color:#555;">취소</a>
+                    <button type="submit" class="update-button">수정 완료</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+    
+</body>
+</html>

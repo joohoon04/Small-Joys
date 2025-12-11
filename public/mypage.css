@@ -1,0 +1,133 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    background-color: #FFF8E1;
+    color: #36454F;
+}
+
+/* 마이페이지 */
+.mypage-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.mypage-box {
+    background-color: #FFFFFF;
+    padding: 35px 45px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+}
+
+.mypage-box h2 {
+    text-align: center;
+    color: #5a9dc5; 
+    font-weight: 700;
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+/* 프로필 수정 폼 */
+.mypage-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.mypage-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.mypage-form input {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box; 
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-size: 1em;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.mypage-form input:focus {
+    border-color: #87CEEB;
+    box-shadow: 0 0 5px rgba(135, 206, 235, 0.5);
+    outline: none;
+}
+
+/* ID */
+.mypage-form input[name="id"] {
+    background-color: #ececec;
+    cursor: not-allowed;
+    color: #777;
+}
+
+/* 비밀번호 */
+.password-section {
+    border-top: 1px dashed #ccc;
+    padding-top: 20px;
+    margin-top: 10px;
+}
+
+.password-section label {
+    color: #666;
+    font-weight: 500;
+}
+
+/* 버튼 그룹 */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+}
+
+/* 수정하기 버튼 */
+.update-button {
+    background-color: #87CEEB;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1em;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.update-button:hover {
+    background-color: #5a9dc5; 
+    box-shadow: 0 4px 10px rgba(135, 206, 235, 0.4);
+}
+
+/* 회원 탈퇴 링크 */
+.withdraw-button {
+    background-color: transparent;
+    color: #e63946; 
+    font-weight: 600;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e63946;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.withdraw-button:hover {
+    background-color: #e63946;
+    color: #fff;
+}

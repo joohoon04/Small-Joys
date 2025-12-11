@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>행복 찾기 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css"> 
+    <link rel="stylesheet" href="/happy-find.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home">나의 다이어리</a>|
+            <a href="/happy-find" style="font-weight: bold; color: #5a9dc5;">행복 찾기</a>| <a href="/mypage">마이페이지</a>|
+            <a href="/login">로그아웃</a>
+        </nav>
+    </header>
+
+    <main class="challenge-container">
+        
+    <% if (errorMessage) { %>
+        <div style="background-color: #e6f7ff; color: #0056b3; border: 1px solid #b3e0ff; 
+                    padding: 15px; margin-bottom: 20px; border-radius: 8px; text-align: center;
+                    font-weight: bold; grid-column: 1 / -1;">
+            <%= errorMessage %>
+        </div>
+    <% } %>
+
+        <section class="random-box">
+            <h3>우연한 행복 발견 🎲</h3>
+            <p>지금 바로 다른 사람의 소소한 행복 기록을 랜덤으로 만나보세요.
+                따뜻한 위로와 새로운 영감을 얻을 수 있습니다.</p>
+            <a href="/random" class="random-btn">랜덤 행복 글 보러가기</a>
+        </section>
+
+        <section>
+            <h2>📝 현재 진행 중인 행복 챌린지</h2>
+            <div class="challenge-list-grid">
+                
+                <% if (challenges && challenges.length > 0) { %>
+        
+                    <% challenges.forEach(c => { %>
+                        <div class="challenge-card">
+                            <h4>[<%= c.duration %>일 챌린지] <%= c.title %></h4>
+                        
+                            <p><%= c.description %></p>
+                            <p class="challenge-status">필수 태그: <%= c.requiredTags.join(', ') || '없음' %></p>
+                            <div class="challenge-progress">
+
+                                <% if (c.status === '챌린지 성공') { %>
+                                    <span style="color: #007bff; font-weight: bold;">🎉 챌린지 성공 (<%= c.currentPostsCount %> / <%= c.duration %> 일)</span>
+                                    <div class="challenge-actions">
+                                        <form action="/challenges/<%= c._id %>/leave" method="POST" style="display: inline; margin-right: 10px;">
+                                            <button type="submit" class="join-btn" 
+                                                    style="background-color: #f44336; padding: 8px 15px;">기록 삭제</button>
+                                        </form>
+                                        <button class="join-btn" disabled style="background-color: #6c757d; cursor: not-allowed;">미션 완료</button>
+                                    </div>
+                                <% } else if (c.status === '참여 중') { %>
+                                    <span style="color: #28a745;">현재 참여 중입니다. (<%= c.currentPostsCount %> / <%= c.duration %> 일)</span>
+                                    <div class="challenge-actions">
+                                        <form action="/challenges/<%= c._id %>/leave" method="POST" style="display: inline;">
+                                            <button type="submit" class="join-btn" 
+                                                     style="background-color: #f44336; padding: 8px 15px;">참여 취소</button>
+                                        </form>
+                                    </div>
+                                <% } else { // c.status === '미참여' %>
+                                    <span style="color: #888;">아직 참여 전입니다.</span>
+                                    <div class="challenge-actions">
+                                        <form action="/challenges/<%= c._id %>/join" method="POST" style="display: inline;">
+                                            <button type="submit" class="join-btn">참여하기</button>
+                                        </form> 
+                                    </div>
+                                <% } %>
+                                </div>
+                        </div>
+                    <% }) %>
+                    
+                <% } else { %>
+      
+               <p style="grid-column: 1 / -1;
+                    text-align: center; color: #888;">현재 진행 중인 챌린지가 없습니다.</p>
+                <% } %>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+</body>
+</html>

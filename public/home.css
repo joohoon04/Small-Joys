@@ -1,0 +1,129 @@
+/* 메인 컨테이너 */
+.diary-container {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 20px 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+/* 페이지 헤더 */
+.diary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.diary-header h2 {
+    margin: 0;
+    color: #5a9dc5;
+    font-size: 1.8em;
+}
+
+.header .nav a:hover{
+    color: #5a9dc5;
+}
+
+
+/* 새 일기 쓰기 버튼 */
+.new-post-btn {
+    background-color: #87CEEB; 
+    color: #fff;
+    font-weight: 700;
+    padding: 10px 18px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.new-post-btn:hover {
+    background-color: #5a9dc5;
+    box-shadow: 0 4px 10px rgba(135, 206, 235, 0.4);
+}
+
+/* 다이어리 리스트 */
+.diary-list {
+    display: grid;
+    gap: 15px;
+}
+
+/* 다이어리 각 항목 (클릭 가능한 카드) */
+.diary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.diary-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #87CEEB;
+}
+
+.diary-item h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.25em;
+}
+
+.diary-item p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* 공개/비공개 상태 표시 뱃지 */
+.item-status span {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+.status-public {
+    background-color: #e0f7fa;
+    color: #00796b; 
+}
+.status-private {
+    background-color: #f3e5f5;
+    color: #6a1b9a; 
+}
+
+/* 게시물 없을 때 */
+.no-posts {
+    text-align: center;
+    padding: 50px;
+    color: #888;
+    background-color: #fafafa;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+}
+
+/* 푸터 */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    
+    background-color: #87CEEB;
+    /* padding: 15px; */
+    text-align: center;
+    color: #36454F;
+    font-size: 0.9em;
+    font-weight: 500;
+    
+    border-top: 1px solid #e0e0e0;
+    padding: 20px 30px;
+    margin-top: 263px;
+}

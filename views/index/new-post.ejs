@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새 일기 쓰기 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css"> 
+    <link rel="stylesheet" href="/mypage.css">
+
+    <style>
+        textarea.post-content {
+            width: 100%;
+            height: 250px; 
+            padding: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            font-size: 1em;
+            font-family: 'Malgun Gothic', sans-serif;
+            resize: vertical;
+        }
+        
+        .checkbox-group { 
+            margin-top: 20px; 
+            text-align: left; 
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .checkbox-group input { 
+            margin-right: 8px; 
+            transform: scale(1.2); 
+        }
+        .checkbox-group label { 
+            font-weight: 600; 
+            color: #333; 
+            margin-top: 0; 
+            text-align: left;
+            display: inline; 
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home">나의 다이어리</a>|
+            <a href="/happy-find">행복 찾기</a>|            
+            <a href="/mypage">마이페이지</a>|
+            <a href="/logout">로그아웃</a>|
+        </nav>
+    </header>
+
+    <main class="mypage-container">
+        <div class="mypage-box">
+            <h2>새로운 행복 기록하기</h2>
+            
+            <form action="/post/new" method="POST" class="mypage-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" name="title" placeholder="오늘의 행복은 무엇인가요?" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="challengeId">참여 챌린지 선택 (선택)</label>
+                    <select id="challengeId" name="challengeId" class="post-content" style="height: auto;"> 
+                        <option value="">-- 참여할 챌린지 없음 --</option>
+                        <% 
+                            if (challenges && challenges.length > 0) {
+                                challenges.forEach(c => { 
+                                    if (c && c._id) {
+                        %>
+                            <option value="<%= c._id %>"><%= c.title %></option>
+                        <% 
+                                    }
+                                }) 
+                            }
+                        %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="postImage">이미지 (선택)</label>
+                    <input type="file" id="postImage" name="postImage" accept="image/*" style="padding:0; border:none; background:none;">
+                </div>
+
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    <textarea id="content" name="content" class="post-content" placeholder="오늘 있었던 감사한 일, 행복했던 순간을 자유롭게 적어주세요." required></textarea>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="isPublic" name="isPublic" value="true">
+                    <label for="isPublic">이 일기를 '공유페이지'에 공개합니다.</label>
+                </div>
+                
+                <div class="button-group">
+                    <a href="/home" class="withdraw-button" style="border-color:#aaa; color:#555;">취소</a>
+                    <button type="submit" class="update-button">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+    
+</body>
+</html>

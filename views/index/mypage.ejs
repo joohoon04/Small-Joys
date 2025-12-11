@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css"> 
+    <link rel="stylesheet" href="/mypage.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home">나의 다이어리</a>|
+            <a href="happy-find">행복찾기</a>|
+            <a href="/mypage" style="font-weight: bold; color: #5a9dc5;">마이페이지</a>|
+            <a href="/login">로그아웃</a>
+        </nav>
+    </header>
+
+    <main class="mypage-container">
+        <div class="mypage-box">
+            <h2>내 정보 수정</h2>
+            
+            <!-- 정보 수정 폼 -->
+            <form action="/mypage" method="POST" class="mypage-form">
+                
+                <div class="form-group">
+                    <label for="id">아이디</label>
+                    <input type="text" id="id" name="id" value="<%= user.id %>" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" value="<%= user.name %>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" value="<%= user.email || '' %>" placeholder="example@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">전화번호</label>
+                    <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>" placeholder="010-0000-0000">
+                </div>
+
+                <div class="password-section">
+                    <div class="form-group">
+                        <label for="password">새 비밀번호</label>
+                        <input type="password" id="password" name="password" placeholder="새 비밀번호 (변경 시에만 입력)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">새 비밀번호 확인</label>
+                        <input type="password" id="confirm-password" name="confirm_password" placeholder="새 비밀번호 다시 입력">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <a href="#" onclick="confirmWithdraw(event)" class="withdraw-button">회원 탈퇴</a>
+                    <button type"submit" class="update-button">정보 수정하기</button>
+                </div>
+            </form>
+            
+            <form id="withdraw-form" action="/withdraw" method="POST" style="display: none;"></form>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+
+    <script>
+        function confirmWithdraw(event) {
+            event.preventDefault();            
+            const isConfirmed = confirm("정말로 회원 탈퇴를 하시겠습니까?\n모든 다이어리 기록과 댓글이 영구적으로 삭제됩니다.");
+            
+            if (isConfirmed) {
+                document.getElementById('withdraw-form').submit();
+            }
+        }
+    </script>
+
+</body>
+</html>

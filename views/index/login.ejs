@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Small Joys</title>
+    <link rel="stylesheet" href="/login.css"> 
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/register">회원가입</a>
+        </nav>
+    </header>
+
+    <main class="login-container">
+        <div class="login-box">
+            <h2>Login</h2>
+            <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                <div class="error-message">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+            <form action="/login" method="POST" class="login-form">
+                <label for="id">ID</label>
+                <input type="text" id="id" name="id" placeholder="아이디" required><br>
+                
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호" required><br>
+                
+                <div class="actions">
+                    <a href="/register" class="signup-button">Sign up</a>
+                    
+                    <button type="submit" class="submit-arrow">→</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+</body>
+</html>

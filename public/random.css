@@ -1,0 +1,63 @@
+/* random-view.ejs 전용 스타일 */
+.random-view-container { 
+    max-width: 700px; 
+    margin: 50px auto; 
+    padding: 30px; 
+    background-color: #fff; 
+    border-radius: 10px; 
+    box-shadow: 0 0 15px rgba(0,0,0,0.05); 
+}
+.random-header { 
+    text-align: center;
+    margin-bottom: 30px; 
+    border-bottom: 2px dashed #eee; 
+    padding-bottom: 20px; 
+}
+.random-title { 
+    color: #5a9dc5; 
+    margin: 0; 
+    font-size: 1.8em; 
+}
+.random-meta { 
+    font-size: 0.9em; 
+    color: #999; 
+    margin-top: 10px; 
+}
+.random-meta .author { 
+    font-weight: bold; 
+    color: #5a9dc5; 
+}
+.random-content { 
+    margin-top: 25px; 
+    line-height: 1.8; 
+    color: #333; 
+}
+.random-image { 
+    max-width: 100%; 
+    height: auto; 
+    border-radius: 8px;
+    margin-top: 20px; 
+}
+
+.random-actions { 
+    text-align: center; 
+    margin-top: 40px; 
+}
+.random-actions button, .random-actions a { 
+    padding: 10px 20px;
+    margin: 0 10px; 
+    border-radius: 25px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    border: none; 
+}
+.cheer-btn { 
+    background-color: #5a9dc5; 
+    color: white; 
+}
+.new-random-btn { 
+    background-color: #e9ecef;
+    color: #333; 
+    text-decoration: none; 
+    display: inline-block; 
+}

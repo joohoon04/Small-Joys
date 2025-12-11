@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>랜덤 행복 발견 - Small Joys</title>
+    <link rel="stylesheet" href="/register.css">
+    <link rel="stylesheet" href="/random.css">
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">Small Joys</div>
+        <nav class="nav">
+            <a href="/shared">공유페이지</a>|
+            <a href="/home">나의 다이어리</a>|
+            <a href="/happy-find" style="font-weight: bold; color: #5a9dc5;">행복 찾기</a>|
+            <a href="/mypage">마이페이지</a>|
+            <a href="/logout">로그아웃</a>
+        </nav>
+    </header>
+
+    <main class="random-view-container">
+        
+        <header class="random-header">
+            <p style="font-size: 1.1em; color: #5a9dc5; margin-bottom: 5px;">✨ 당신에게 도착한 랜덤 행복 ✨</p>
+            <h1 class="random-title"><%= post.title %></h1>
+            <div class="random-meta">
+                작성자: <span class="author"><%= post.authorId %></span> | 
+                작성일: <%= post.createdAt.toLocaleDateString('ko-KR') %>
+            </div>
+        </header>
+
+        <section class="random-content">
+            <% if (post.imageUrl) { %>
+                <img src="<%= post.imageUrl %>" alt="게시물 이미지" class="random-image">
+            <% } %>
+            <p><%= post.content %></p>
+        </section>
+
+        <div class="random-actions">
+            <button class="cheer-btn">💖 응원해요!</button>
+            <a href="/random" class="new-random-btn">🎲 새로운 랜덤 글 보기</a>
+        </div>
+        
+    </main>
+
+    <footer class="footer">
+         KAYWON UNIVERSITY DIGITAL MEDIA DESIGN JOOJAEHOON
+         copyrtghtⓒJOOJAEHOON All RIGHT RESERVED | &copy; 2025
+    </footer>
+
+</body>
+</html>
