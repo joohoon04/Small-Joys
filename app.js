@@ -31,9 +31,10 @@ app.set("view engine", "ejs");
 
 // 3. MongoDB 연결
 const mongoUrl = process.env.MONGO_URL;
-mongoose.connect(mongoUrl), {
-    useNewUrlParser: true, useUnifiedTopology: true
-}
+mongoose.connect(mongoUrl, {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true
+})
 
 .then(() => console.log("MongoDB 연결 성공"))
 .catch(err => console.error("MongoDB 연결 실패:", err));
