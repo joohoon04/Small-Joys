@@ -30,7 +30,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 // 3. MongoDB 연결
-const mongoUrl = "mongodb+srv://hun04:as1234@cluster0.eue8kiz.mongodb.net/rlakf"; 
+const mongoUrl = process.env.MONGO_URL;
 mongoose.connect(mongoUrl)
 //     , {
 //     useNewUrlParser: true,
