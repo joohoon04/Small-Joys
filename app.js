@@ -6,6 +6,7 @@ const app = express();
 const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");  
+// 💡 수정 1: connect-mongo의 호환성을 위해 가져오는 방식을 변경합니다.
 const connectMongo = require("connect-mongo"); 
 const MongoStore = connectMongo.default || connectMongo;
 
@@ -19,7 +20,7 @@ app.use(helmet({
             defaultSrc: ["'self'"], 
             scriptSrc: ["'self'", "'unsafe-inline'"], 
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            imgSrc: ["'self'", "data:"], 
+            imgSrc: ["'self'", "data:\""], 
             connectSrc: ["'self'", "http://localhost:3000"] 
         },
     },
@@ -32,11 +33,10 @@ app.set("view engine", "ejs");
 
 // 3. MongoDB 연결
 const mongoUrl = process.env.MONGO_URL;
+// 💡 수정 2: Mongoose/MongoDB 최신 버전은 옵션을 지원하지 않으므로 모두 제거합니다.
 mongoose.connect(mongoUrl, {
-    // useNewUrlParser: true, 
-    // useUnifiedTopology: true
-})
-
+    // useNewUrlParser, useUnifiedTopology, sslvalidate 등 모든 옵션은 제거됩니다.
+}) 
 .then(() => console.log("MongoDB 연결 성공"))
 .catch(err => console.error("MongoDB 연결 실패:", err));
 
@@ -48,8 +48,10 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     store: new MongoStore({ 
-        mongoUrl: mongoUrl, 
-        collectionName: 'sessions' 
+        mongoUrl: mongoUrl,
+        collectionName: 'sessions' // 세션 컬렉션 이름 지정 (선택 사항)
+        // 💡 수정 3: MongoStore 생성자에도 지원하지 않는 옵션을 제거합니다.
+        // sslvalidate 등의 옵션을 절대 추가하지 않습니다.
     })
 }));
 
@@ -58,7 +60,6 @@ const index = require("./routes/index");
 app.use("/", index); 
 
 // 6. 서버 실행
-// Render에서는 환경 변수 PORT를 사용하고, 로컬에서는 3000번을 사용합니다.
 const PORT = process.env.PORT || 3000; 
 app.listen(PORT, function () {
     console.log(`${PORT}번 포트 실행 중입니다.`);
