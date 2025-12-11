@@ -1,8 +1,8 @@
 // seedChallenges.js
-const mongoose = require('mongoose');
+const DB_URI = process.env.MONGO_URL;
 
 // 🚨 1. MongoDB 연결 URI: 사용자님이 사용하시는 URI를 그대로 사용합니다. 🚨
-const DB_URI = 'mongodb+srv://hun04:as1234@cluster0.eue8kiz.mongodb.net/rlakf'; 
+const DB_URI = 'mongodb+srv://hun04:as1234@cluster0.eue8kiz.mongodb.net/rlakf';
 
 const { Challenge, initialChallenges } = require('./models/Challenge'); 
 
