@@ -14,9 +14,8 @@ const { Challenge, initialChallenges } = require("../models/Challenge");
 require("../models/Comment");
 require("../models/Post");
 
-// 2. Mongoose 캐시에서 모델을 가져와 변수에 할당합니다.
+// Mongoose 캐시에서 모델을 가져와 변수에 할당합니다.
 const User = mongoose.model('User');
-// const Challenge = mongoose.model('Challenge'); 
 const Comment = mongoose.model('Comment');
 const Post = mongoose.model('Post');
 
@@ -27,16 +26,14 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// ⭐ [추가 1] 관리자 전용 미들웨어 (Admin Check Middleware)
+// ⭐ [관리자 기능] 관리자 전용 미들웨어 (Admin Check Middleware)
 const requireAdmin = (req, res, next) => {
     // 1. 로그인 여부 확인
     if (!req.session.isLoggedIn) {
         req.session.errorMessage = "로그인이 필요합니다.";
         return res.redirect("/login");
     }
-    // 2. 관리자 권한 확인 (User 모델에 isAdmin 필드가 있다고 가정)
-    // 세션 정보는 로그인 시 DB에서 가져와 저장되므로, 세션에 isAdmin 필드가 있어야 합니다.
-    // **참고: 로그인 시 세션에 isAdmin 필드를 추가하도록 아래 로그인 라우트도 수정해야 합니다.**
+    // 2. 관리자 권한 확인
     if (!req.session.user || !req.session.user.isAdmin) {
         req.session.errorMessage = "관리자 권한이 필요합니다.";
         return res.redirect("/home");
@@ -55,13 +52,12 @@ router.get("/login", (req, res) => {
     delete req.session.errorMessage;
     res.render("index/login", { errorMessage: errorMessage });
 });
-// ⭐ [수정 1] 로그인 라우트: isAdmin 정보를 세션에 저장
+
+// ⭐ [수정] 로그인 라우트: isAdmin 정보를 세션에 저장 및 관리자 리다이렉트 처리
 router.post("/login", async (req, res) => {
     try {
         const { id, password } = req.body;
 
-        // 1. ID로 사용자 찾기
-        // User.findOne 시 isAdmin 필드를 포함하여 가져옵니다.
         const user = await User.findOne({ id: id }); 
 
         if (!user) {
@@ -69,18 +65,17 @@ router.post("/login", async (req, res) => {
             return res.redirect("/login");
         }
 
-        // 2. 비밀번호 비교 (bcrypt.compare 사용)
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
             req.session.isLoggedIn = true;
-            // ⭐ 세션에 isAdmin 필드 추가
+            // ⭐ 세션에 isAdmin 필드 추가 (User 모델에 있다고 가정)
             req.session.user = { 
-                _id: user._id, 
+                _id: user._id.toString(), // ObjectId를 문자열로 변환하여 세션에 저장
                 id: user.id, 
                 name: user.name,
                 challenges: user.challenges || [],
-                isAdmin: user.isAdmin || false // isAdmin 필드 추가
+                isAdmin: user.isAdmin || false 
             };
             
             // 관리자라면 /admin으로 리다이렉트
@@ -104,69 +99,62 @@ router.get("/logout", (req, res) => {
         res.redirect("/login");
     });
 });
-// routes/index.js
+
 router.get("/register", (req, res) => {
     const errorMessage = req.session.errorMessage;
     delete req.session.errorMessage;
-    // 뷰 경로를 'index/register'로 변경하여 'views/index/register.ejs'를 찾도록 합니다.
     res.render("index/register", { errorMessage: errorMessage }); 
 });
-// ⭐ [수정 2] 회원가입 라우트: 관리자 코드를 통해 관리자 계정 생성
+
+// ⭐ [수정] 회원가입 라우트: 관리자 코드를 통해 관리자 계정 생성
 router.post("/register", async (req, res) => {
     try {
-        // req.body에서 필요한 필드를 모두 추출합니다.
-        // ⭐ adminCode 필드 추가
         const { id, name, email, phone, password, confirm_password, adminCode } = req.body; 
         const ADMIN_SECRET_CODE = "ADMIN1234!"; // 임시 관리자 비밀 코드
 
-        // 1. 필수 필드 유효성 검사 추가 (null 또는 빈 문자열 방지)
         if (!id || !name || !password || !confirm_password) {
             req.session.errorMessage = "아이디, 이름, 비밀번호는 필수 입력 항목입니다.";
             return res.redirect("/register");
         }
         
-        // 2. 비밀번호 일치 확인 (필수)
         if (password !== confirm_password) {
             req.session.errorMessage = "비밀번호와 비밀번호 확인이 일치하지 않습니다.";
             return res.redirect("/register");
         }
 
-        // 3. 아이디 중복 확인 추가 (DB에서 한번 더 확인)
         const existingUserById = await User.findOne({ id: id });
         if (existingUserById) {
             req.session.errorMessage = "이미 사용 중인 아이디입니다. 다른 아이디를 사용해주세요.";
             return res.redirect("/register");
         }
         
-        // 3-1. 이메일 중복 확인 (입력된 경우에만 확인)
+        // 이메일 중복 확인
         if (email) { 
             const existingUserByEmail = await User.findOne({ email: email });
             if (existingUserByEmail) {
-                req.session.errorMessage = "이미 사용 중인 이메일입니다. 다른 이메일을 입력하거나 비워두세요.";
+                req.session.errorMessage = "이미 사용 중인 이메일입니다.";
                 return res.redirect("/register");
             }
         }
         
-        // [⭐️ 확인 및 유지] 3-2. 전화번호 중복 확인 (입력된 경우에만 확인)
+        // 전화번호 중복 확인
         if (phone) { 
             const existingUserByPhone = await User.findOne({ phone: phone });
             if (existingUserByPhone) {
-                req.session.errorMessage = "이미 사용 중인 전화번호입니다. 다른 전화번호를 입력하거나 비워두세요.";
+                req.session.errorMessage = "이미 사용 중인 전화번호입니다.";
                 return res.redirect("/register");
             }
         }
         
-        // 4. 비밀번호 암호화
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // ⭐ 5. 관리자 여부 확인 및 설정
+        // ⭐ 관리자 여부 확인 및 설정
         let isAdmin = false;
         if (adminCode && adminCode === ADMIN_SECRET_CODE) {
             isAdmin = true;
         }
 
-        // 6. 새 사용자 생성 및 저장
         const user = new User({
             id, 
             name,
@@ -174,7 +162,7 @@ router.post("/register", async (req, res) => {
             phone,
             password: hashedPassword,
             username: id, 
-            isAdmin: isAdmin // isAdmin 필드 저장
+            isAdmin: isAdmin 
         });
 
         await user.save();
@@ -189,10 +177,7 @@ router.post("/register", async (req, res) => {
     } catch (error) {
         let errorMessage = "회원가입 처리 중 알 수 없는 서버 오류가 발생했습니다.";
         
-        if (error.name === 'ValidationError') {
-            errorMessage = "필수 입력 항목을 모두 채워주세요. (아이디, 이름, 비밀번호)";
-        } 
-        else if (error.code === 11000) {
+        if (error.code === 11000) {
             errorMessage = "이미 사용 중인 정보(아이디 또는 이메일, 전화번호)가 있습니다. 다른 정보를 사용해주세요.";
         }
         
@@ -235,17 +220,35 @@ router.post("/post/:id/comment", async (req, res) => {
     }
 });
 
-// POST /comment/delete/:commentId (댓글 삭제)
+// ⭐ [수정] POST /comment/delete/:commentId (댓글 삭제): 관리자 권한 추가
 router.post("/comment/delete/:commentId", async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect("/login");
+    
+    // ⭐ [수정] 관리자 권한 변수 설정
+    const isAdmin = req.session.user && req.session.user.isAdmin;
+
     try {
         const comment = await Comment.findById(req.params.commentId);
-        if (comment && comment.author === req.session.user.id) {
-            await Comment.findByIdAndDelete(req.params.commentId);
+
+        if (!comment) {
+            req.session.errorMessage = "존재하지 않는 댓글입니다.";
+            return res.redirect(req.headers.referer || "/home");
         }
+
+        // ⭐ [수정] 삭제 조건: 작성자이거나 관리자(isAdmin: true)일 경우 삭제 가능
+        if (comment.author === req.session.user.id || isAdmin) {
+            await Comment.findByIdAndDelete(req.params.commentId);
+            req.session.errorMessage = "댓글이 삭제되었습니다.";
+        } else {
+            // 권한 없음
+            req.session.errorMessage = "삭제 권한이 없습니다.";
+        }
+        
         res.redirect(req.headers.referer || "/home");
     } catch (error) {
-        res.redirect("/home");
+        console.error("댓글 삭제 오류:", error);
+        req.session.errorMessage = "댓글 삭제 처리 중 오류가 발생했습니다.";
+        res.redirect(req.headers.referer || "/home");
     }
 });
 
@@ -317,47 +320,39 @@ router.get("/post/new", async (req, res) => {
     }
 });
 
-/// index.js 라우터 파일 내 POST /post/new
 router.post("/post/new", upload.single("postImage"), async (req, res) => {
     const user = req.session.user;
     if (!user) return res.redirect("/login");
 
-    // req.body에서 challengeId를 추가로 구조 분해 할당
     const { title, content, isPublic, challengeId } = req.body; 
 
     try {
         const newPost = new Post({
             title: title,
             content: content,
-            // req.file 사용 시
             imageUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
             authorId: user.id, 
             isPublic: !!isPublic,
-            
-            // ⭐ 이 부분이 추가되어야 합니다.
-            // new-post.ejs에서 챌린지 선택 시 넘어온 challengeId를 저장합니다.
-            // 선택하지 않았다면 null이 저장됩니다.
             challengeId: challengeId || null 
         });
 
         await newPost.save();
+        
         // 챌린지 성공 여부 확인 로직
         if (challengeId) {
             const challenge = await Challenge.findById(challengeId);
             if (challenge) {
                 const requiredCount = challenge.duration;
 
-                // 해당 챌린지로 작성된 총 일기 개수 카운트
                 const currentPostsCount = await Post.countDocuments({ 
                     authorId: user.id, 
                     challengeId: challengeId 
                 });
 
-                // 성공 조건을 만족했고, 현재 DB 상태가 'SUCCESS'가 아니라면 업데이트
                 if (currentPostsCount >= requiredCount) {
                     await User.updateOne(
                         { id: user.id, 'joinedChallenges.challengeId': challengeId },
-                        { $set: { 'joinedChallenges.$.status': 'SUCCESS' } } // DB에 성공 상태 명시
+                        { $set: { 'joinedChallenges.$.status': 'SUCCESS' } } 
                     );
                     console.log(`[Challenge Success] User ${user.id} completed challenge ${challengeId}`);
                 }
@@ -380,16 +375,13 @@ router.get("/post/detail/:id", async (req, res) => {
     const postId = req.params.id; 
     if (!mongoose.Types.ObjectId.isValid(postId)) {
         console.error(`Invalid Post ID attempted: ${postId}`);
-        // 유효하지 않은 요청은 게시물을 찾을 수 없다는 응답을 보냅니다.
         return res.status(404).send("유효하지 않은 게시물 식별자입니다."); 
     }
     
     try {
-        // 유효성이 검사된 postId로 Post 찾기
         const post = await Post.findById(postId);
         
         if (!post) {
-            // ID 형식은 맞지만 해당 ID의 게시물이 없는 경우
             return res.status(404).send("게시물을 찾을 수 없습니다.");
         }
         
@@ -401,7 +393,6 @@ router.get("/post/detail/:id", async (req, res) => {
             comments: comments
         });
     } catch (error) {
-        // 다른 종류의 서버 오류 발생 시 (네트워크, DB 연결 등)
         console.error("상세페이지 로딩 중 오류:", error);
         res.redirect("/home");
     }
@@ -459,18 +450,21 @@ router.post("/post/edit/:id", upload.single('postImage'), async (req, res) => {
     }
 });
 
-// POST /post/delete/:id (게시물 삭제)
+// ⭐ [수정] POST /post/delete/:id (게시물 삭제): 관리자 권한 추가
 router.post("/post/delete/:id", async (req, res) => {
     const postId = req.params.id;
-    const userId = req.session.user ? req.session.user.id : null;
+    const user = req.session.user;
 
-    if (!userId) {
+    if (!user) {
         req.session.errorMessage = "로그인이 필요합니다.";
         return res.redirect("/login");
     }
 
+    // ⭐ [추가] 관리자 권한 변수 설정
+    const isAdmin = user.isAdmin;
+
     try {
-        // 1. 해당 ID의 게시물을 찾습니다. (작성자가 맞는지 확인하기 위함)
+        // 1. 해당 ID의 게시물을 찾습니다.
         const post = await Post.findById(postId);
 
         if (!post) {
@@ -478,18 +472,28 @@ router.post("/post/delete/:id", async (req, res) => {
             return res.redirect("/home");
         }
 
-        // 2. 작성자 ID와 세션 ID가 일치하는지 확인
-        if (post.authorId !== userId) {
-            console.log(`사용자 ${userId}는 게시물 ${postId}의 작성자가 아닙니다.`);
+        // ⭐ [수정] 삭제 조건: 작성자 ID와 세션 ID가 일치하거나 (일반 사용자), isAdmin이 true인 경우 (관리자)
+        if (post.authorId === user.id || isAdmin) {
+            
+            // 2. 일기 및 관련 댓글 삭제 실행
+            await Post.deleteOne({ _id: postId });
+            await Comment.deleteMany({ postId: postId }); // 해당 게시물의 댓글도 모두 삭제
+            
+            // 관리자 삭제 시 메시지 다르게 표시
+            if (isAdmin && post.authorId !== user.id) {
+                req.session.errorMessage = `관리자 권한으로 사용자 (${post.authorId})의 일기가 삭제되었습니다.`;
+            } else {
+                req.session.errorMessage = "일기가 성공적으로 삭제되었습니다.";
+            }
+            
+            return res.redirect("/home");
+            
+        } else {
+            // 권한 없음
+            console.log(`사용자 ${user.id}는 게시물 ${postId}의 작성자가 아닙니다.`);
             req.session.errorMessage = "삭제 권한이 없습니다.";
             return res.redirect("/home");
         }
-
-        // 3. 일기 삭제 실행
-        await Post.deleteOne({ _id: postId });
-
-        req.session.errorMessage = "일기가 성공적으로 삭제되었습니다.";
-        res.redirect("/home");
         
     } catch (error) {
         console.error("일기 삭제 중 오류 발생:", error);
@@ -570,9 +574,7 @@ router.get("/main", (req, res) => {
     res.redirect("/shared");
 });
 
-// index.js (라우터 하단에 추가)
-
-// --- 4. 행복 찾기(Happy Find) 및 챌린지 관련 라우트 ---
+// --- 7. 행복 찾기(Happy Find) 및 챌린지 관련 라우트 ---
 
 // GET /happy-find: 행복 찾기 허브 (챌린지 목록, 랜덤 발견 버튼)
 router.get("/happy-find", async (req, res) => {
@@ -585,11 +587,9 @@ router.get("/happy-find", async (req, res) => {
         const fullUser = await User.findOne({ id: user.id })
             .populate('joinedChallenges.challengeId'); 
         
-        // 사용자가 작성한 모든 일기 목록을 가져와서 현재 진행도 계산용으로 사용
         const userPosts = await Post.find({ authorId: user.id, challengeId: { $ne: null } });
 
         const challengesWithStatus = allChallenges.map(c => {
-            // 사용자 정보에서 해당 챌린지의 상태 객체를 찾습니다.
             const userChallenge = fullUser.joinedChallenges.find(
                 jc => jc.challengeId && jc.challengeId._id.equals(c._id) 
             );
@@ -598,26 +598,21 @@ router.get("/happy-find", async (req, res) => {
             let currentPostsCount = 0;
 
             if (userChallenge) {
-                // 1. 기본 상태는 '참여 중'으로 설정
                 status = '참여 중'; 
 
-                // 2. 현재 일기 작성 개수를 계산
                 currentPostsCount = userPosts.filter(
-                    // c._id는 Challenge 모델에서 가져온 ObjectId, Post의 challengeId도 ObjectId로 가정
                     p => p.challengeId && p.challengeId.equals(c._id)
                 ).length;
                 
-                // 3. 핵심 수정: 일기 개수로 성공 여부를 재검증합니다.
                 if (currentPostsCount >= c.duration) {
                     status = '챌린지 성공';
                 } 
-                // 4. 만약 DB에 SUCCESS로 저장되어 있어도, 일기 개수가 부족하면 '참여 중'으로 표시됩니다.
             }
 
             return {
                 ...c.toObject(),
                 currentPostsCount: currentPostsCount,
-                status: status // '미참여', '참여 중', '챌린지 성공' 중 하나 (DB 기반 또는 기본값)
+                status: status
             };
         });
 
@@ -644,13 +639,12 @@ router.post("/challenges/:challengeId/join", async (req, res) => {
     if (!user) return res.redirect("/login");
     
     try {
-        // User 모델에서 현재 사용자의 joinedChallenges 배열에 challengeId를 추가합니다.
         const updateResult = await User.updateOne(
-            { id: user.id, 'joinedChallenges.challengeId': { $ne: challengeId } }, // 중복 방지
+            { id: user.id, 'joinedChallenges.challengeId': { $ne: challengeId } }, 
             { $push: { 
                 joinedChallenges: { 
                     challengeId: challengeId,
-                    status: '진행중' // DB에 참여 상태 명시
+                    status: '진행중' 
                 } 
             }}
         );
@@ -677,14 +671,12 @@ router.post("/challenges/:challengeId/leave", async (req, res) => {
     }
 
     try {
-        // Mongoose의 $pull 연산자를 사용하여, joinedChallenges 배열에서 
-        // challengeId가 일치하는 객체를 찾아서 제거합니다.
         await User.updateOne(
             { id: user.id },
             { 
                 $pull: { 
                     joinedChallenges: { 
-                        challengeId: challengeId // 해당 챌린지 ID를 가진 객체만 배열에서 제거
+                        challengeId: challengeId 
                     } 
                 } 
             }
@@ -704,22 +696,16 @@ router.get("/random", async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect("/login");
     try {
         const [randomPost] = await Post.aggregate([
-            // 1. 필터링: 공개 글(isPublic: true)만 선택
             { $match: { isPublic: true } },
-            
-            // 2. 무작위 추출: 1개의 문서를 무작위로 선택 (MongoDB의 강력한 기능)
             { $sample: { size: 1 } },
-            
-            // 3. 작성자 정보 결합 (랜덤 노출 동의 여부 확인을 위해)
             {
                 $lookup: {
-                    from: 'users',      // MongoDB 컬렉션 이름 (일반적으로 소문자 복수형)
+                    from: 'users',      
                     localField: 'authorId', 
-                    foreignField: 'id', // Post에 저장된 authorId가 User의 id 필드와 일치한다고 가정
+                    foreignField: 'id', 
                     as: 'authorInfo'
                 }
             },
-            // 4. 정보 가공: 노출 필터링
             {
                 $project: {
                     _id: 1,
@@ -727,13 +713,11 @@ router.get("/random", async (req, res) => {
                     content: 1,
                     imageUrl: 1,
                     createdAt: 1,
-                    // 익명 처리 로직
                     authorId: {
                         $cond: {
-                            // isRandomExposed 필드가 User 모델에 있다고 가정합니다.
                             if: { $eq: [{ $arrayElemAt: ["$authorInfo.isRandomExposed", 0] }, false] }, 
-                            then: "익명의 행복 전도사", // 랜덤 노출 비동의 시 익명 처리
-                            else: "$authorId" // 동의 시 닉네임 사용
+                            then: "익명의 행복 전도사", 
+                            else: "$authorId" 
                         }
                     }
                 }
@@ -741,7 +725,6 @@ router.get("/random", async (req, res) => {
         ]);
 
         if (randomPost) {
-            // 새로운 템플릿으로 렌더링
             res.render("index/random-view", { 
                 post: randomPost,
                 user: req.session.user
@@ -756,13 +739,14 @@ router.get("/random", async (req, res) => {
     }
 });
 
-// ⭐ [추가 2] 관리자 모드 라우트 ---
+// ⭐ [관리자 기능] 관리자 모드 라우트 ---
 // GET /admin: 관리자 대시보드
 router.get("/admin", requireAdmin, async (req, res) => {
     try {
         const totalUsers = await User.countDocuments({});
         const totalPosts = await Post.countDocuments({});
-        const users = await User.find().sort({ createdAt: -1 });
+        // 최근 50명의 사용자 정보만 가져와서 표시
+        const users = await User.find().sort({ createdAt: -1 }).limit(50); 
 
         const errorMessage = req.session.errorMessage;
         delete req.session.errorMessage;
@@ -846,6 +830,6 @@ router.post("/admin/user/:id/toggle-admin", requireAdmin, async (req, res) => {
         res.redirect("/admin");
     }
 });
-// ⭐ --- 관리자 모드 라우트 끝 ---
+// --- 관리자 모드 라우트 끝 ---
 
 module.exports = router;
