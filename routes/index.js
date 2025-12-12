@@ -555,21 +555,50 @@ router.post("/mypage", async (req, res) => {
 });
 router.post("/withdraw", async (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect("/login");
+    
+    // 탈퇴 전에 세션에서 사용자 정보를 안전하게 복사
+    const userId = req.session.user._id;     // User Document ID (ObjectId)
+    const userDbId = req.session.user.id;   // 로그인 ID (String)
+
     try {
-        const userId = req.session.user._id;
-        const userDbId = req.session.user.id;
-        await Comment.deleteMany({ author: userDbId });
-        await Post.deleteMany({ authorId: userDbId });
-        await User.findByIdAndDelete(userId);
+        // 1. 해당 사용자의 모든 관련 데이터 삭제
+        // 1-1. 댓글 삭제 (로그인 ID 사용)
+        await Comment.deleteMany({ author: userDbId }); 
+        
+        // 1-2. 게시물 삭제 (로그인 ID 사용)
+        await Post.deleteMany({ authorId: userDbId }); 
+        
+        // 1-3. ⭐ [추가] User Document 자체에서 챌린지 참여 기록을 삭제 (User Document 삭제 전)
+        // Note: User Document를 통째로 삭제하므로 이 단계는 생략 가능하지만, 안전하게 명시적으로 처리
+        // await User.findByIdAndUpdate(userId, { $set: { joinedChallenges: [] } }); 
+        
+        // 2. 사용자 계정 삭제 (ObjectId 사용)
+        const deleteResult = await User.findByIdAndDelete(userId); 
+
+        if (!deleteResult) {
+            // 사용자 Document가 이미 존재하지 않는 경우 (특정 시점에 이미 삭제된 경우)
+            console.warn(`[Withdraw] User Document not found for ID: ${userId}. Proceeding with session destruction.`);
+        }
+
+        // 3. 세션 파괴 후 로그인 페이지로 리다이렉트
         req.session.destroy((err) => {
-            if (err) return res.redirect("/home");
+            if (err) {
+                // 세션 파괴 에러가 발생하면 로그를 남기고 로그인 페이지로 리다이렉트
+                console.error("회원탈퇴 후 세션 파괴 오류:", err);
+                return res.redirect("/login");
+            }
+            // 성공 메시지는 세션이 파괴되었으므로 사용할 수 없음.
             res.redirect("/login");
         });
     } catch (error) {
-        res.redirect("/home");
+        // ⭐ [수정] 탈퇴 중 DB 관련 심각한 오류 발생 시 로그를 남기고 사용자에게 피드백
+        console.error(`[Withdraw Error] User ID ${userDbId} 탈퇴 중 오류 발생:`, error);
+        
+        // 에러 메시지를 세션에 임시 저장하여 다음 페이지(홈 또는 마이페이지)에서 표시
+        req.session.errorMessage = "회원 탈퇴 중 시스템 오류가 발생했습니다. 다시 시도해 주세요.";
+        res.redirect("/mypage"); // 마이페이지로 돌려보내 에러 메시지 표시 권장
     }
 });
- 
 router.get("/main", (req, res) => {
     res.redirect("/shared");
 });
