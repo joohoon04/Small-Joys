@@ -59,7 +59,9 @@
                 </div>
 
                 <div class="button-group">
-                    <a href="#" onclick="confirmWithdraw(event)" class="withdraw-button">회원 탈퇴</a>
+                    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                        <p style="color: red; text-align: center; font-weight: bold;"><%= errorMessage %></p>
+                    <% } %>
                     <button type"submit" class="update-button">정보 수정하기</button>
                 </div>
             </form>
