@@ -1,5 +1,3 @@
-// index.js (파일 상단: Line 1 ~ Line 18까지)
-
 "use strict";
 
 const express = require("express");
@@ -28,6 +26,24 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
 const upload = multer({ storage: storage });
+
+// ⭐ [추가 1] 관리자 전용 미들웨어 (Admin Check Middleware)
+const requireAdmin = (req, res, next) => {
+    // 1. 로그인 여부 확인
+    if (!req.session.isLoggedIn) {
+        req.session.errorMessage = "로그인이 필요합니다.";
+        return res.redirect("/login");
+    }
+    // 2. 관리자 권한 확인 (User 모델에 isAdmin 필드가 있다고 가정)
+    // 세션 정보는 로그인 시 DB에서 가져와 저장되므로, 세션에 isAdmin 필드가 있어야 합니다.
+    // **참고: 로그인 시 세션에 isAdmin 필드를 추가하도록 아래 로그인 라우트도 수정해야 합니다.**
+    if (!req.session.user || !req.session.user.isAdmin) {
+        req.session.errorMessage = "관리자 권한이 필요합니다.";
+        return res.redirect("/home");
+    }
+    next();
+};
+
 // --- 1. 인증(Auth) 관련 라우트 ---
 router.get("/", (req, res) => {
     const errorMessage = req.session.errorMessage;
@@ -39,11 +55,13 @@ router.get("/login", (req, res) => {
     delete req.session.errorMessage;
     res.render("index/login", { errorMessage: errorMessage });
 });
+// ⭐ [수정 1] 로그인 라우트: isAdmin 정보를 세션에 저장
 router.post("/login", async (req, res) => {
     try {
         const { id, password } = req.body;
 
         // 1. ID로 사용자 찾기
+        // User.findOne 시 isAdmin 필드를 포함하여 가져옵니다.
         const user = await User.findOne({ id: id }); 
 
         if (!user) {
@@ -52,19 +70,23 @@ router.post("/login", async (req, res) => {
         }
 
         // 2. 비밀번호 비교 (bcrypt.compare 사용)
-        // 입력된 일반 비밀번호와 DB에 저장된 해시 비밀번호를 비교합니다.
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
             req.session.isLoggedIn = true;
-            // 세션에 사용자 정보 저장
+            // ⭐ 세션에 isAdmin 필드 추가
             req.session.user = { 
                 _id: user._id, 
                 id: user.id, 
                 name: user.name,
-                challenges: user.challenges || []
-                // 필요하다면 isRandomExposed 등 다른 필드도 추가
+                challenges: user.challenges || [],
+                isAdmin: user.isAdmin || false // isAdmin 필드 추가
             };
+            
+            // 관리자라면 /admin으로 리다이렉트
+            if (user.isAdmin) {
+                return res.redirect("/admin");
+            }
             return res.redirect("/home");
         } else {
             req.session.errorMessage = "아이디 또는 비밀번호가 올바르지 않습니다.";
@@ -89,12 +111,13 @@ router.get("/register", (req, res) => {
     // 뷰 경로를 'index/register'로 변경하여 'views/index/register.ejs'를 찾도록 합니다.
     res.render("index/register", { errorMessage: errorMessage }); 
 });
-// index.js (router.post("/register") 부분)
-// index.js (router.post("/register") 부분)
+// ⭐ [수정 2] 회원가입 라우트: 관리자 코드를 통해 관리자 계정 생성
 router.post("/register", async (req, res) => {
     try {
         // req.body에서 필요한 필드를 모두 추출합니다.
-        const { id, name, email, phone, password, confirm_password } = req.body; 
+        // ⭐ adminCode 필드 추가
+        const { id, name, email, phone, password, confirm_password, adminCode } = req.body; 
+        const ADMIN_SECRET_CODE = "ADMIN1234!"; // 임시 관리자 비밀 코드
 
         // 1. 필수 필드 유효성 검사 추가 (null 또는 빈 문자열 방지)
         if (!id || !name || !password || !confirm_password) {
@@ -132,43 +155,47 @@ router.post("/register", async (req, res) => {
                 return res.redirect("/register");
             }
         }
+        
         // 4. 비밀번호 암호화
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // 5. 새 사용자 생성 및 저장
+        // ⭐ 5. 관리자 여부 확인 및 설정
+        let isAdmin = false;
+        if (adminCode && adminCode === ADMIN_SECRET_CODE) {
+            isAdmin = true;
+        }
+
+        // 6. 새 사용자 생성 및 저장
         const user = new User({
             id, 
             name,
             email,
             phone,
             password: hashedPassword,
-            // 문제의 필드: 'username' 필드가 'id'와 동일한 값을 갖도록 명시
             username: id, 
+            isAdmin: isAdmin // isAdmin 필드 저장
         });
 
         await user.save();
         
-        req.session.errorMessage = "회원가입이 완료되었습니다. 로그인 해주세요.";
+        if (isAdmin) {
+             req.session.errorMessage = "관리자 계정으로 회원가입이 완료되었습니다. 로그인 해주세요.";
+        } else {
+             req.session.errorMessage = "회원가입이 완료되었습니다. 로그인 해주세요.";
+        }
         res.redirect("/login");
 
     } catch (error) {
-        // 1. catch 블록 최상단에서 errorMessage 변수를 선언하고 기본값을 할당합니다.
         let errorMessage = "회원가입 처리 중 알 수 없는 서버 오류가 발생했습니다.";
         
         if (error.name === 'ValidationError') {
-            // 이메일이나 전화번호 같은 필수 아닌 항목의 유효성 검사 실패 시
             errorMessage = "필수 입력 항목을 모두 채워주세요. (아이디, 이름, 비밀번호)";
         } 
-        
-        // [유지] E11000 Duplicate Key Error 처리
         else if (error.code === 11000) {
-            // 이 오류는 id, email, phone, 또는 username 등 고유 인덱스가 설정된 필드가 중복되었을 때 발생합니다.
-            // DB에 남은 username: null 문서가 원인일 수 있습니다.
             errorMessage = "이미 사용 중인 정보(아이디 또는 이메일, 전화번호)가 있습니다. 다른 정보를 사용해주세요.";
         }
         
-        // 2. 정의된 변수를 사용하여 세션에 오류 메시지를 저장합니다.
         req.session.errorMessage = errorMessage;
         res.redirect("/register");
     }
@@ -406,7 +433,7 @@ router.post("/post/edit/:id", upload.single('postImage'), async (req, res) => {
     try {
         const postId = req.params.id;
         const post = await Post.findById(postId);
-        if (!post) return res.status(4.04).send("게시물을 찾을 수 없습니다.");
+        if (!post) return res.status(40.4).send("게시물을 찾을 수 없습니다.");
 
         if (post.authorId !== req.session.user.id) {
             console.log("수정 권한 없음. 작성자가 다릅니다.");
@@ -453,6 +480,7 @@ router.post("/post/delete/:id", async (req, res) => {
 
         // 2. 작성자 ID와 세션 ID가 일치하는지 확인
         if (post.authorId !== userId) {
+            console.log(`사용자 ${userId}는 게시물 ${postId}의 작성자가 아닙니다.`);
             req.session.errorMessage = "삭제 권한이 없습니다.";
             return res.redirect("/home");
         }
@@ -476,7 +504,11 @@ router.get("/mypage", async (req, res) => {
     try {
         const dbUser = await User.findById(req.session.user._id);
         if (!dbUser) return res.redirect("/logout");
-        res.render("index/mypage", { user: dbUser });
+
+        const errorMessage = req.session.errorMessage;
+        delete req.session.errorMessage;
+
+        res.render("index/mypage", { user: dbUser, errorMessage: errorMessage });
     } catch (error) {
         res.redirect("/home");
     }
@@ -487,8 +519,12 @@ router.post("/mypage", async (req, res) => {
         const userId = req.session.user._id;
         const { name, email, phone, password, confirm_password } = req.body;
         const updateData = { name, email, phone };
+        
         if (password && password.length > 0) {
-            if (password !== confirm_password) return res.redirect("/mypage");
+            if (password !== confirm_password) {
+                req.session.errorMessage = "비밀번호와 비밀번호 확인이 일치하지 않습니다.";
+                return res.redirect("/mypage");
+            }
             
             // 비밀번호 암호화 후 저장
             const saltRounds = 10;
@@ -496,21 +532,14 @@ router.post("/mypage", async (req, res) => {
             updateData.password = hashedPassword;
         }
         
-        // 업데이트 전에 중복 체크를 한 번 더 수행하는 것이 좋습니다.
-        // 마이페이지 업데이트 시에도 id, email, phone의 고유성 제약조건을 지켜야 합니다.
-
         const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
         
         // 세션 정보 업데이트
         req.session.user.name = updatedUser.name;
-        // id는 고유해야 하므로 변경하지 않습니다. (id 필드는 마이페이지에서 수정되지 않음)
-        // req.session.user.id = updatedUser.id; 
         
         res.redirect("/mypage");
     } catch (error) {
-        // 마이페이지 업데이트 중 중복 키 오류(E11000) 발생 시 처리
         if (error.code === 11000) {
-             // 예를 들어, 다른 사용자가 이미 사용 중인 이메일/전화번호로 변경하려 했을 때
              console.error("마이페이지 업데이트 중 중복 오류:", error);
              req.session.errorMessage = "이미 사용 중인 이메일 또는 전화번호입니다. 다른 정보를 사용해주세요.";
         } else {
@@ -661,9 +690,6 @@ router.post("/challenges/:challengeId/leave", async (req, res) => {
             }
         );
 
-        // 참고: 이 작업은 참여 기록만 지우며, 사용자가 이 챌린지로 작성했던 일기(Post)는 유지됩니다.
-        // 만약 일기까지 모두 삭제하려면 Post.deleteMany(...) 코드를 추가해야 합니다.
-
         req.session.errorMessage = "챌린지 참여가 성공적으로 취소되었습니다.";
         res.redirect("/happy-find");
     } catch (error) {
@@ -704,7 +730,8 @@ router.get("/random", async (req, res) => {
                     // 익명 처리 로직
                     authorId: {
                         $cond: {
-                            if: { $eq: [{ $arrayElemAt: ["$authorInfo.isRandomExposed", 0] }, false] },
+                            // isRandomExposed 필드가 User 모델에 있다고 가정합니다.
+                            if: { $eq: [{ $arrayElemAt: ["$authorInfo.isRandomExposed", 0] }, false] }, 
                             then: "익명의 행복 전도사", // 랜덤 노출 비동의 시 익명 처리
                             else: "$authorId" // 동의 시 닉네임 사용
                         }
@@ -728,5 +755,97 @@ router.get("/random", async (req, res) => {
         res.redirect("/happy-find");
     }
 });
+
+// ⭐ [추가 2] 관리자 모드 라우트 ---
+// GET /admin: 관리자 대시보드
+router.get("/admin", requireAdmin, async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments({});
+        const totalPosts = await Post.countDocuments({});
+        const users = await User.find().sort({ createdAt: -1 });
+
+        const errorMessage = req.session.errorMessage;
+        delete req.session.errorMessage;
+
+        res.render("index/admin/dashboard", {
+            user: req.session.user,
+            totalUsers,
+            totalPosts,
+            users,
+            errorMessage
+        });
+    } catch (error) {
+        console.error("관리자 대시보드 로딩 오류:", error);
+        req.session.errorMessage = "데이터를 불러오는 중 오류가 발생했습니다.";
+        res.redirect("/home");
+    }
+});
+
+// POST /admin/user/:id/delete: 사용자 강제 탈퇴
+router.post("/admin/user/:id/delete", requireAdmin, async (req, res) => {
+    const userId = req.params.id; // 삭제할 사용자(_id)
+    
+    try {
+        const userToDelete = await User.findById(userId);
+
+        if (!userToDelete) {
+            req.session.errorMessage = "존재하지 않는 사용자입니다.";
+            return res.redirect("/admin");
+        }
+        
+        // 관리자 본인 계정은 삭제 방지
+        if (userToDelete._id.toString() === req.session.user._id) {
+            req.session.errorMessage = "본인 관리자 계정은 강제 탈퇴할 수 없습니다.";
+            return res.redirect("/admin");
+        }
+
+        const userDbId = userToDelete.id; // Post/Comment 삭제를 위한 사용자 로그인 ID
+        
+        // 1. 해당 사용자의 댓글, 게시물 모두 삭제
+        await Comment.deleteMany({ author: userDbId });
+        await Post.deleteMany({ authorId: userDbId });
+        
+        // 2. 사용자 계정 삭제
+        await User.findByIdAndDelete(userId);
+
+        req.session.errorMessage = `사용자 (${userDbId})가 강제 탈퇴되었습니다.`;
+        res.redirect("/admin");
+
+    } catch (error) {
+        console.error("관리자 사용자 삭제 오류:", error);
+        req.session.errorMessage = "사용자 강제 탈퇴 중 오류가 발생했습니다.";
+        res.redirect("/admin");
+    }
+});
+
+// POST /admin/user/:id/toggle-admin: 관리자 권한 부여/회수
+router.post("/admin/user/:id/toggle-admin", requireAdmin, async (req, res) => {
+    const userId = req.params.id;
+    
+    try {
+        const userToUpdate = await User.findById(userId);
+
+        if (!userToUpdate) {
+            req.session.errorMessage = "존재하지 않는 사용자입니다.";
+            return res.redirect("/admin");
+        }
+        
+        // 권한 토글 (현재 상태의 반대로 설정)
+        const newAdminStatus = !userToUpdate.isAdmin;
+        
+        // 업데이트
+        await User.findByIdAndUpdate(userId, { isAdmin: newAdminStatus });
+        
+        const statusText = newAdminStatus ? "관리자 권한이 부여" : "관리자 권한이 회수";
+        req.session.errorMessage = `사용자 (${userToUpdate.id})에게 ${statusText}되었습니다.`;
+        res.redirect("/admin");
+
+    } catch (error) {
+        console.error("관리자 권한 토글 오류:", error);
+        req.session.errorMessage = "관리자 권한 변경 중 오류가 발생했습니다.";
+        res.redirect("/admin");
+    }
+});
+// ⭐ --- 관리자 모드 라우트 끝 ---
 
 module.exports = router;
